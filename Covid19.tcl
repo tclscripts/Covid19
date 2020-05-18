@@ -1,14 +1,14 @@
 #######################################################################################################
-## Covid19.tcl 1.3.3  (20/04/2020)  			  Copyright 2008 - 2020 @ WwW.TCLScripts.NET         ##
+## Covid19.tcl 1.3.4  (15/05/2020)  			  Copyright 2008 - 2020 @ WwW.TCLScripts.NET ##
 ##                        _   _   _   _   _   _   _   _   _   _   _   _   _   _                      ##
 ##                       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \                     ##
 ##                      ( T | C | L | S | C | R | I | P | T | S | . | N | E | T )                    ##
 ##                       \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/                     ##
 ##                                                                                                   ##
-##                                      ® BLaCkShaDoW Production ®                    	             ##
+##                                      Â® BLaCkShaDoW Production Â®                    	             ##
 ##                                                                                                   ##
 ##                                              PRESENTS                                             ##
-##									                            ®##
+##									                          Â®  ##
 ############################################  Covid-19 TCL   ##########################################
 ##									                             ##
 ##  DESCRIPTION: 							                             ##
@@ -90,6 +90,9 @@
 ##   Version 1.3.3 -- added total stats for continents Europe, North America, Asia, South America,   ##
 ##                    Africa, Oceania								     ##
 ##                 -- soved issue with GLOBAL stats output                                           ##
+##												     ##
+##   Version 1.3.4 -- solved some issues due to page info modification                               ##
+##                 -- solved some little bugs                                                        ##
 ##												     ##
 #######################################################################################################
 #######################################################################################################
@@ -278,7 +281,7 @@ set corona(country_list) {
 "Malta"
 "Taiwan"
 "Jordan"
-"Réunion"
+"RÃ©union"
 "Georgia"
 "Senegal"
 "Mauritius"
@@ -356,7 +359,7 @@ set corona(country_list) {
 "Dominica"
 "Namibia"
 "Saint Lucia"
-"Curaçao"
+"CuraÃ§ao"
 "Grenada"
 "Saint Kitts and Nevis"
 "CAR"
@@ -384,6 +387,8 @@ set corona(country_list) {
 "Anguilla"
 "Saint Pierre Miquelon"
 "Yemen"
+"Lesotho"
+"Comoros"
 }
 
 ###############################################################################################################
@@ -463,6 +468,7 @@ if {[string tolower $country] == "global"} {
 	set totaltests_per_milion [lindex $extract 10]
 	set type [lindex $extract 11]
 	set last_updated [lindex $extract 12]
+	set extract [string map [list $last_updated ""] $extract]
 if {$new_cases == ""} { set new_cases - }
 if {$total_deaths == ""} { set total_deaths - }
 if {$new_deaths == ""} { set new_deaths - }
@@ -594,12 +600,12 @@ if {$total > "0"} {
 	set last_line 0
 switch $total {
 	1 {
-	set var "<tr class=\"total_row_world\">"
+	set var "<td style=\"text-align:left;\">World</td>"
 	}
 	2 {
 	set var "<nobr>$country</nobr>"
 	}
-}	
+}
 foreach line $split_data {
 	set line [concat $line]
 if {[regexp -nocase $var $line]} {
@@ -701,6 +707,7 @@ if {$test > 0} {
 	lappend information $m
 	}
 }
+
 	set country [corona:filter [lindex $information 0] 0]
 	set total_cases [corona:filter [lindex $information 1] 0]
 	set new_cases [corona:filter [lindex $information 2] 0]
@@ -713,11 +720,12 @@ if {$test > 0} {
 	set deaths_per_milion [corona:filter [lindex $information 9] 0]
 	set total_tests [corona:filter [lindex $information 10] 0]
 	set totaltests_per_milion [corona:filter [lindex $information 11] 0]
+	
 
-	set yesterday_total_recovered [corona:comma [corona:filter [lindex $information_yesterday 5] 0]]
-	set yesterday_active_cases [corona:comma [corona:filter [lindex $information_yesterday 6] 0]]
-	set yesterday_serious_cases [corona:comma [corona:filter [lindex $information_yesterday 7] 0]]
-	set yesterday_total_tests [corona:comma [corona:filter [lindex $information_yesterday 10] 0]]
+	set yesterday_total_recovered [corona:comma [corona:filter [lindex $information_yesterday 6] 0]]
+	set yesterday_active_cases [corona:comma [corona:filter [lindex $information_yesterday 7] 0]]
+	set yesterday_serious_cases [corona:comma [corona:filter [lindex $information_yesterday 8] 0]]
+	set yesterday_total_tests [corona:comma [corona:filter [lindex $information_yesterday 11] 0]]
 
 	set dif_total_recovered 0
 	set dif_active_cases 0
@@ -916,7 +924,7 @@ proc fixpoint {varName script} {
 set corona(name) "Covid-19"
 set corona(owner) "BLaCkShaDoW"
 set corona(site) "WwW.TclScripts.Net"
-set corona(version) "1.3.3"
+set corona(version) "1.3.4"
 
 ####
 #Language
