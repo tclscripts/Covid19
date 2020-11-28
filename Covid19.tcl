@@ -1,14 +1,14 @@
 #######################################################################################################
-## Covid19.tcl 1.3.4  (15/05/2020)  			  Copyright 2008 - 2020 @ WwW.TCLScripts.NET ##
+## Covid19.tcl 1.3.5  (04/06/2020)  			  Copyright 2008 - 2020 @ WwW.TCLScripts.NET ##
 ##                        _   _   _   _   _   _   _   _   _   _   _   _   _   _                      ##
 ##                       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \                     ##
 ##                      ( T | C | L | S | C | R | I | P | T | S | . | N | E | T )                    ##
 ##                       \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/                     ##
 ##                                                                                                   ##
-##                                      ® BLaCkShaDoW Production ®                    	             ##
+##                                      � BLaCkShaDoW Production �                    	           ##
 ##                                                                                                   ##
 ##                                              PRESENTS                                             ##
-##									                          ®  ##
+##									                           �##
 ############################################  Covid-19 TCL   ##########################################
 ##									                             ##
 ##  DESCRIPTION: 							                             ##
@@ -57,43 +57,48 @@
 ##                    request informations and I'll contact you as soon as possible.                 ##
 ##									                             ##
 #######################################################################################################
-##												     ##
-##  Version 1.1 -- If country isnt specificed it will show the total statistics		     	     ##
-##									                             ##
+##												         ##
+##  Version 1.1 -- If country isnt specificed it will show the total statistics		     	 ##
+##									                                ##
 ##  Commmands: !Covid [country] - if not specified it will show the total statistics                 ##
-##											             ##
+##											                ##
 ##                                                                                                   ##
 ##  Settings: .chanset/.set #chan +covid - enable the !covid <city> command                          ##
-##            							                                     ##
+##            							                                        ##
 ##                                                                                                   ##
 ##            .chanset/.set #chan +autocovid - enable the auto message on timer if the               ##
-##             information changes (like RSS feed)		                                     ##
-##           											     ##
+##             information changes (like RSS feed)		                                       ##
+##           											         ##
 ##            .chanset/.set #chan covid-country [your country] - setup the default country           ##
-##            for the Covid19 RSS (auto show information)					     ##
-##												     ##
-##            .chanset/.set #chan covid-lang Ro/En/Es - setup the default language for the scrip     ##
-##												     ##
-##   Version 1.2.1 -- Added some new countries and places					     ##
-##   Version 1.2.2 -- Solved an issue related to https connection 			 	     ##
-##    												     ##
-##   Version 1.3 -- Solved some issues related to page layout		                             ##
-##		 -- Added some more details from the page                                            ##
-##												     ##
+##            for the Covid19 RSS (auto show information)					         ##
+##												         ##
+##            .chanset/.set #chan covid-lang Ro/En/Es - setup the default language for the scrip      ##
+##												          ##
+##   Version 1.2.1 -- Added some new countries and places					          ##
+##   Version 1.2.2 -- Solved an issue related to https connection 			 	          ##
+##    												          ##
+##   Version 1.3 -- Solved some issues related to page layout		                         ##
+##		 -- Added some more details from the page                                             ##
+##												         ##
 ##   Version 1.3.1 -- added difference between today and yesterday for active cases, recovered,      ##
-##		      serious cases, tests for countries				             ##
-##		   -- solved some bugs related to settng your default country			     ##
+##		      serious cases, tests for countries				                ##
+##		   -- solved some bugs related to settng your default country		        ##
 ##		   -- added spanish language support                                                 ##
-##												     ##
-##   Version 1.3.2 -- added last updated entry to channel output				     ##
-##												     ##
-##   Version 1.3.3 -- added total stats for continents Europe, North America, Asia, South America,   ##
-##                    Africa, Oceania								     ##
-##                 -- soved issue with GLOBAL stats output                                           ##
-##												     ##
-##   Version 1.3.4 -- solved some issues due to page info modification                               ##
-##                 -- solved some little bugs                                                        ##
-##												     ##
+##												        ##
+##   Version 1.3.2 -- added last updated entry to channel output				         ##
+##												         ##
+##   Version 1.3.3 -- added total stats for continents Europe, North America, Asia, South America,    ##
+##                    Africa, Oceania								          ##
+##                 -- soved issue with GLOBAL stats output                                            ##
+##												          ##
+##   Version 1.3.4 -- solved some issues due to page info modification                                ##
+##                 -- solved some little bugs                                                         ##
+##                                                                                                    ##
+##   Version 1.3.5 -- solved some issues due to page info modification                                ##
+##                 -- added population for countries                                                  ##
+##                 -- added difference between today and yesterday for active cases, recovered,       ##
+##                    serious cases for global and continents                                        ##
+##												         ##
 #######################################################################################################
 #######################################################################################################
 ##									                             ##
@@ -281,7 +286,7 @@ set corona(country_list) {
 "Malta"
 "Taiwan"
 "Jordan"
-"Réunion"
+"R�union"
 "Georgia"
 "Senegal"
 "Mauritius"
@@ -359,7 +364,7 @@ set corona(country_list) {
 "Dominica"
 "Namibia"
 "Saint Lucia"
-"Curaçao"
+"Cura�ao"
 "Grenada"
 "Saint Kitts and Nevis"
 "CAR"
@@ -567,6 +572,7 @@ if {$find_country < 0 && $find_continent < 0} {
 	set totaltests_per_milion [lindex $extract 10]
 	set type [lindex $extract 11]
 	set last_updated [lindex $extract 12]
+	set population [lindex $extract 13]
 if {$new_cases == ""} { set new_cases - }
 if {$total_deaths == ""} { set total_deaths - }
 if {$new_deaths == ""} { set new_deaths - }
@@ -578,27 +584,41 @@ if {$deaths_per_milion == ""} { set deaths_per_milion - }
 if {$total_tests == ""} { set total_tests - }
 if {$totaltests_per_milion == ""} { set totaltests_per_milion - }
 if {$type > "0"} {
-	corona:say $nick $chan [list $country $total_cases $new_cases $total_deaths $new_deaths $total_recovered $active_cases $serious_critical $totalcases_per_milion $deaths_per_milion $total_tests $totaltests_per_milion $last_updated] 3
+	corona:say $nick $chan [list $country $total_cases $new_cases $total_deaths $new_deaths $total_recovered $active_cases $serious_critical $totalcases_per_milion $deaths_per_milion $total_tests $totaltests_per_milion $last_updated $population] 3
 } else {
 	corona:say $nick $chan [list $country $total_cases $new_cases $total_deaths $new_deaths $total_recovered $active_cases $serious_critical $totalcases_per_milion $deaths_per_milion $last_updated] 5
 	}
 }
 
-###
+
 proc corona:extract {data country total} {
 	global corona
 	set last_updated "N/A"
+	set yesterday_data ""
+	set today_data ""
 	set var_lastupdated "<div style=\"font-size:13px; color:#999; margin-top:5px; text-align:center\">Last updated:(.*)</div>(.*)"
 	regexp {<div style=\"font-size:13px; color:#999; margin-top:5px; text-align:center\">(.*)</div>(.*)} $data -> last_updated
 	regsub {</div>(.*)} $last_updated "" last_updated
 	set last_updated [concat [string map {"Last updated:" ""} $last_updated]]
-if {$total > "0"} {
-	set split_data [split $data "\n"]
-	set information ""
+	
+	regexp {<table id="main_table_countries_yesterday" class="table table-bordered table-hover main_table_countries" style="width:100%;margin-top: 0px !important;display:none;">(.*)} $data yesterday_data
+	regsub {</table>(.*)} $yesterday_data "" yesterday_data
+	
+	regexp {<table id="main_table_countries_today" class="table table-bordered table-hover main_table_countries" style="width:100%;margin-top: 0px !important;display:none;">(.*)} $data today_data
+	regsub {</table>(.*)} $today_data "" today_data
+	
+	set split_today_data [split $today_data "\n"]
+	set split_yesterday_data [split $yesterday_data "\n"]
+
+	set information_today ""
+	set information_yesterday ""
 	set c 0
 	set first_line 0
 	set last_line 0
 switch $total {
+	0 {
+	set var "<td style=\"font-weight: bold; font-size:15px; text-align:left;\">$country</td>|<td style=\"font-weight: bold; font-size:15px; text-align:left;\"><a class=\"mt_a\" href=\"(.*)\">$country</a></td>(.*)"
+	}
 	1 {
 	set var "<td style=\"text-align:left;\">World</td>"
 	}
@@ -606,7 +626,36 @@ switch $total {
 	set var "<nobr>$country</nobr>"
 	}
 }
-foreach line $split_data {
+
+foreach line $split_today_data {
+	set line [concat $line]
+if {[regexp -nocase $var $line]} {
+	set first_line $c
+	continue
+	}
+if {[string match -nocase "*</tr>" $line] && $first_line > 0} {
+	set last_line $c
+	break
+	}
+	set c [expr $c + 1]
+}
+
+	set new_data [lrange $split_today_data $first_line $last_line]
+foreach line $new_data {
+	set test [regexp {<td style="(.*)">\d*(.*)\d*</td>|<td>(.*)</td>|text-align:right;(.*)\">\d*(.*)\d*</td>|<td>\d*(.*)\d*</td>} $line match]
+if {$test > 0} {
+	regsub {</td>(.*)} $match "" m
+if {[string match -nocase "*population*" $m]} {
+	regexp {<a href="/world-population/(.*)/">(.*)} $m -> a m
+}
+	lappend information_today $m
+	}
+}
+
+	set first_line 0
+	set last_line 0
+	set c 0
+foreach line $split_yesterday_data {
 	set line [concat $line]
 if {[regexp -nocase $var $line]} {
 	set first_line $c
@@ -618,115 +667,160 @@ if {[string match -nocase "*</tr>" $line] && $first_line > 0} {
 }
 	set c [expr $c + 1]
 }
-	set new_data [lrange $split_data $first_line $last_line]
+
+	set new_data [lrange $split_yesterday_data $first_line $last_line]
 foreach line $new_data {
 	set test [regexp {<td style="(.*)">\d*(.*)\d*</td>|<td>(.*)</td>|text-align:right;(.*)\">\d*(.*)\d*</td>|<td>\d*(.*)\d*</td>} $line match]
-if {$test > 0} {
-	regsub {</td>(.*)} $match "" m
-	lappend information $m
-	}
-}
-if {$total == "2"} {
-	set total_cases [corona:filter [lindex $information 0] 0]
-	set new_cases [corona:filter [lindex $information 1] 0]
-	set total_deaths [corona:filter [lindex $information 2] 0]
-	set new_deaths [corona:filter [lindex $information 3] 0]
-	set total_recovered [corona:filter [lindex $information 4] 0]
-	set active_cases [corona:filter [lindex $information 5] 0]
-	set serious_cases [corona:filter [lindex $information 6] 0]
-	set totalcases_per_milion [corona:filter [lindex $information 7] 0]
-	set deaths_per_milion [corona:filter [lindex $information 8] 0]
-	set total_tests [corona:filter [lindex $information 9] 0]
-	set totaltests_per_milion [corona:filter [lindex $information 10] 0]
-} else {
-	set total_cases [corona:filter [lindex $information 1] 0]
-	set new_cases [corona:filter [lindex $information 2] 0]
-	set total_deaths [corona:filter [lindex $information 3] 0]
-	set new_deaths [corona:filter [lindex $information 4] 0]
-	set total_recovered [corona:filter [lindex $information 5] 0]
-	set active_cases [corona:filter [lindex $information 6] 0]
-	set serious_cases [corona:filter [lindex $information 7] 0]
-	set totalcases_per_milion [corona:filter [lindex $information 8] 0]
-	set deaths_per_milion [corona:filter [lindex $information 9] 0]
-	set total_tests [corona:filter [lindex $information 10] 0]
-	set totaltests_per_milion [corona:filter [lindex $information 11] 0]
-}
-	return [list $total_cases $new_cases $total_deaths $new_deaths $total_recovered $active_cases $serious_cases $totalcases_per_milion $deaths_per_milion $total_tests $totaltests_per_milion 0 $last_updated]
-} else {
-	set split_data [split $data "\n"]
-	set information ""
-	set information_yesterday ""
-	set c 0
-	set first_line 0
-	set last_line 0
-	set found_yesterday 0
-	set var "(.*)<td style=\"font-weight: bold; font-size:15px; text-align:left;\">$country</td>|<td style=\"font-weight: bold; font-size:15px; text-align:left;\"><a class=\"mt_a\" href=\"(.*)\">$country</a></td>"
-foreach line $split_data {
-	set line [concat $line]
-if {[regexp $var $line]} {
-	incr found_yesterday
-	set first_line $c
-	continue
-	}
-if {[string match -nocase "*</tr>" $line] && $first_line > 0 && $found_yesterday == 2} {
-	set last_line [expr $c + 1]
-	break
-}
-	set c [expr $c + 1]
-}
-	set new_data [lrange $split_data $first_line $last_line]
-foreach line $new_data {
-	set test [regexp {<td style="(.*)">\d*(.*)\d*</td>|text-align:right;(.*)\">\d*(.*)\d*</td>} $line match]
 if {$test > 0} {
 	regsub {</td>(.*)} $match "" m
 	lappend information_yesterday $m
 	}
 }
 
-	set c 0
-	set first_line 0
-	set last_line 0
-
-foreach line $split_data {
-	set line [concat $line]
-if {[regexp $var $line]} {
-	set first_line $c
-	continue
-	}
-if {[string match -nocase "*</tr>" $line] && $first_line > 0} {
-	set last_line $c
-	break
-}
-	set c [expr $c + 1]
-}
-	set new_data [lrange $split_data $first_line $last_line]
-foreach line $new_data {
-	set test [regexp {<td style="(.*)">\d*(.*)\d*</td>|text-align:right;(.*)\">\d*(.*)\d*</td>} $line match]
-if {$test > 0} {
-	regsub {</td>(.*)} $match "" m
-	lappend information $m
-	}
-}
-
-	set country [corona:filter [lindex $information 0] 0]
-	set total_cases [corona:filter [lindex $information 1] 0]
-	set new_cases [corona:filter [lindex $information 2] 0]
-	set total_deaths [corona:filter [lindex $information 3] 0]
-	set new_deaths [corona:filter [lindex $information 4] 0]
-	set total_recovered [corona:filter [lindex $information 5] 0]
-	set active_cases [corona:filter [lindex $information 6] 0]
-	set serious_cases [corona:filter [lindex $information 7] 0]
-	set totalcases_per_milion [corona:filter [lindex $information 8] 0]
-	set deaths_per_milion [corona:filter [lindex $information 9] 0]
-	set total_tests [corona:filter [lindex $information 10] 0]
-	set totaltests_per_milion [corona:filter [lindex $information 11] 0]
+if {$total == "2"} {
+	set total_cases [corona:filter [lindex $information_today 0] 0]
+	set new_cases [corona:filter [lindex $information_today 1] 0]
+	set total_deaths [corona:filter [lindex $information_today 2] 0]
+	set new_deaths [corona:filter [lindex $information_today 3] 0]
+	set total_recovered [corona:filter [lindex $information_today 4] 0]
+	set active_cases [corona:filter [lindex $information_today 6] 0]
+	set serious_cases [corona:filter [lindex $information_today 7] 0]
+	set totalcases_per_milion [corona:filter [lindex $information_today 8] 0]
+	set deaths_per_milion [corona:filter [lindex $information_today 9] 0]
+	set total_tests [corona:filter [lindex $information_today 10] 0]
+	set totaltests_per_milion [corona:filter [lindex $information_today 11] 0]
 	
+	set dif_total_recovered 0
+	set dif_active_cases 0
+	set dif_serious_cases 0
 
-	set yesterday_total_recovered [corona:comma [corona:filter [lindex $information_yesterday 6] 0]]
+	set yesterday_total_recovered [corona:comma [corona:filter [lindex $information_yesterday 4] 0]]
+	set yesterday_active_cases [corona:comma [corona:filter [lindex $information_yesterday 6] 0]]
+	set yesterday_serious_cases [corona:comma [corona:filter [lindex $information_yesterday 7] 0]]
+
+if {$total_recovered != "" && $yesterday_total_recovered != "" && $total_recovered != $yesterday_total_recovered} {
+if {[corona:comma $total_recovered] > $yesterday_total_recovered} {
+	set dif_total_recovered +[expr [corona:comma $total_recovered] - $yesterday_total_recovered]
+} else {
+	set dif_total_recovered -[expr $yesterday_total_recovered - [corona:comma $total_recovered]]	
+	}
+}
+if {$active_cases != "" && $yesterday_active_cases != "" && $active_cases != $yesterday_active_cases} {
+if {[corona:comma $active_cases] > $yesterday_active_cases} {
+	set dif_active_cases +[expr [corona:comma $active_cases] - $yesterday_active_cases]
+} else {
+	set dif_active_cases -[expr $yesterday_active_cases - [corona:comma $active_cases]]
+	}
+}
+if {$serious_cases != "" && $yesterday_serious_cases != "" && $serious_cases != $yesterday_serious_cases} {
+if {[corona:comma $serious_cases] > $yesterday_serious_cases} {
+	set dif_serious_cases +[expr [corona:comma $serious_cases] - $yesterday_serious_cases]
+} else {
+	set dif_serious_cases -[expr $yesterday_serious_cases - [corona:comma $serious_cases]]
+	}
+}
+if {$total_tests != "" && $yesterday_total_tests != "" && $total_tests != $yesterday_total_tests} {
+if {[corona:comma $total_tests] > $yesterday_total_tests} {
+	set dif_total_tests +[expr [corona:comma $total_tests] - $yesterday_total_tests]
+} else {
+	set dif_total_tests -[expr $yesterday_total_tests - [corona:comma $total_tests]]	
+	}
+}
+
+if {$dif_total_recovered != "0"} {
+	set total_recovered $total_recovered\[[corona:commify $dif_total_recovered]\]
+}
+if {$dif_active_cases != "0"} {
+	set active_cases $active_cases\[[corona:commify $dif_active_cases]\]
+}
+	
+if {$dif_serious_cases != "0"} {
+	set serious_cases $serious_cases\[[corona:commify $dif_serious_cases]\]
+}
+	
+	return [list $total_cases $new_cases $total_deaths $new_deaths $total_recovered $active_cases $serious_cases $totalcases_per_milion $deaths_per_milion $total_tests $totaltests_per_milion 0 $last_updated]
+} elseif {$total == "1"} {
+	set total_cases [corona:filter [lindex $information_today 1] 0]
+	set new_cases [corona:filter [lindex $information_today 2] 0]
+	set total_deaths [corona:filter [lindex $information_today 3] 0]
+	set new_deaths [corona:filter [lindex $information_today 4] 0]
+	set total_recovered [corona:filter [lindex $information_today 5] 0]
+	set active_cases [corona:filter [lindex $information_today 7] 0]
+	set serious_cases [corona:filter [lindex $information_today 8] 0]
+	set totalcases_per_milion [corona:filter [lindex $information_today 9] 0]
+	set deaths_per_milion [corona:filter [lindex $information_today 10] 0]
+	set total_tests [corona:filter [lindex $information_today 11] 0]
+	set totaltests_per_milion [corona:filter [lindex $information_today 12] 0]
+	
+	set yesterday_total_recovered [corona:comma [corona:filter [lindex $information_yesterday 5] 0]]
+	set yesterday_active_cases [corona:comma [corona:filter [lindex $information_yesterday 7] 0]]
+	set yesterday_serious_cases [corona:comma [corona:filter [lindex $information_yesterday 8] 0]]
+	
+	set dif_total_recovered 0
+	set dif_active_cases 0
+	set dif_serious_cases 0
+	
+	if {$total_recovered != "" && $yesterday_total_recovered != "" && $total_recovered != $yesterday_total_recovered} {
+if {[corona:comma $total_recovered] > $yesterday_total_recovered} {
+	set dif_total_recovered +[expr [corona:comma $total_recovered] - $yesterday_total_recovered]
+} else {
+	set dif_total_recovered -[expr $yesterday_total_recovered - [corona:comma $total_recovered]]	
+	}
+}
+if {$active_cases != "" && $yesterday_active_cases != "" && $active_cases != $yesterday_active_cases} {
+if {[corona:comma $active_cases] > $yesterday_active_cases} {
+	set dif_active_cases +[expr [corona:comma $active_cases] - $yesterday_active_cases]
+} else {
+	set dif_active_cases -[expr $yesterday_active_cases - [corona:comma $active_cases]]
+	}
+}
+if {$serious_cases != "" && $yesterday_serious_cases != "" && $serious_cases != $yesterday_serious_cases} {
+if {[corona:comma $serious_cases] > $yesterday_serious_cases} {
+	set dif_serious_cases +[expr [corona:comma $serious_cases] - $yesterday_serious_cases]
+} else {
+	set dif_serious_cases -[expr $yesterday_serious_cases - [corona:comma $serious_cases]]
+	}
+}
+if {$total_tests != "" && $yesterday_total_tests != "" && $total_tests != $yesterday_total_tests} {
+if {[corona:comma $total_tests] > $yesterday_total_tests} {
+	set dif_total_tests +[expr [corona:comma $total_tests] - $yesterday_total_tests]
+} else {
+	set dif_total_tests -[expr $yesterday_total_tests - [corona:comma $total_tests]]	
+	}
+}
+
+if {$dif_total_recovered != "0"} {
+	set total_recovered $total_recovered\[[corona:commify $dif_total_recovered]\]
+}
+if {$dif_active_cases != "0"} {
+	set active_cases $active_cases\[[corona:commify $dif_active_cases]\]
+}
+	
+if {$dif_serious_cases != "0"} {
+	set serious_cases $serious_cases\[[corona:commify $dif_serious_cases]\]
+}
+	
+	return [list $total_cases $new_cases $total_deaths $new_deaths $total_recovered $active_cases $serious_cases $totalcases_per_milion $deaths_per_milion $total_tests $totaltests_per_milion 0 $last_updated]
+} elseif {$total == "0"} {
+	set country [corona:filter [lindex $information_today 0] 0]
+	set total_cases [corona:filter [lindex $information_today 1] 0]
+	set new_cases [corona:filter [lindex $information_today 2] 0]
+	set total_deaths [corona:filter [lindex $information_today 3] 0]
+	set new_deaths [corona:filter [lindex $information_today 4] 0]
+	set total_recovered [corona:filter [lindex $information_today 5] 0]
+	set active_cases [corona:filter [lindex $information_today 7] 0]
+	set serious_cases [corona:filter [lindex $information_today 8] 0]
+	set totalcases_per_milion [corona:filter [lindex $information_today 9] 0]
+	set deaths_per_milion [corona:filter [lindex $information_today 10] 0]
+	set total_tests [corona:filter [lindex $information_today 11] 0]
+	set totaltests_per_milion [corona:filter [lindex $information_today 12] 0]
+	set population [concat [string map {"</a>" ""} [lindex $information_today 13]]]
+
+	set yesterday_total_recovered [corona:comma [corona:filter [lindex $information_yesterday 5] 0]]
 	set yesterday_active_cases [corona:comma [corona:filter [lindex $information_yesterday 7] 0]]
 	set yesterday_serious_cases [corona:comma [corona:filter [lindex $information_yesterday 8] 0]]
 	set yesterday_total_tests [corona:comma [corona:filter [lindex $information_yesterday 11] 0]]
-
+	
 	set dif_total_recovered 0
 	set dif_active_cases 0
 	set dif_serious_cases 0
@@ -774,7 +868,7 @@ if {$dif_serious_cases != "0"} {
 if {$dif_total_tests != "0"} {
 	set total_tests $total_tests\[[corona:commify $dif_total_tests]\]
 		}
-	return [list $total_cases $new_cases $total_deaths $new_deaths $total_recovered $active_cases $serious_cases $totalcases_per_milion $deaths_per_milion $total_tests $totaltests_per_milion 1 $last_updated]
+	return [list $total_cases $new_cases $total_deaths $new_deaths $total_recovered $active_cases $serious_cases $totalcases_per_milion $deaths_per_milion $total_tests $totaltests_per_milion 1 $last_updated $population]
 	}
 }
 
@@ -786,7 +880,7 @@ if {$type == "0"} {
 } else {
 	set text [string map {"<td>" ""
 			      "<nobr>" ""
-			      "</nobr>" ""	
+			      "</nobr>" ""
 			} $text]
 	return [concat $text]
 	}
@@ -924,7 +1018,7 @@ proc fixpoint {varName script} {
 set corona(name) "Covid-19"
 set corona(owner) "BLaCkShaDoW"
 set corona(site) "WwW.TclScripts.Net"
-set corona(version) "1.3.4"
+set corona(version) "1.3.5"
 
 ####
 #Language
@@ -932,16 +1026,15 @@ set corona(version) "1.3.4"
 ###
 set corona(en.lang.1) "Invalid country specified or NO CASES"
 set corona(en.lang.2) "You exceded the number of commands. Please wait \002%msg.1%\002 seconds."
-set corona(en.lang.3) "\002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Total tests: \002%msg.11%\002 ; Tests/1M pop: \002%msg.12%\002 ; Last Updated: \002%msg.13%\002"
+set corona(en.lang.3) "\002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Total tests: \002%msg.11%\002 ; Tests/1M pop: \002%msg.12%\002 ; Population: \002%msg.14%\002 ; Last Updated: \002%msg.13%\002"
 set corona(en.lang.4) "(AUTO) \002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Total tests: \002%msg.11%\002 ; Tests/1M pop: \002%msg.12%\002 ; Last Updated: \002%msg.13%\002"
 set corona(en.lang.5) "\002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Last Updated: \002%msg.11%\002"
 set corona(en.lang.6) "(AUTO) \002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Last Updated: \002%msg.11%\002"
 
 
-
 set corona(ro.lang.1) "Tara invalida sau nu sunt cazuri."
 set corona(ro.lang.2) "Ai depasit number de comenzi. Te rog asteapta \002%msg.1%\002 secunde."
-set corona(ro.lang.3) "Statistici \002COVID-19\002 -- \002%msg.1%\002 -- Cazuri totale: \002%msg.2%\002 ; Cazuri noi: \037%msg.3%\037 ; Total decedati: \002%msg.4%\002 ; Noi decedati: \037%msg.5%\037 ; Recuperati: \002%msg.6%\002 ; Cazuri active: \037%msg.7%\037 ; Cazuri critice: \002%msg.8%\002 ; Total cazuri/1M pop: \002%msg.9%\002 ; Decedati/1M pop: \002%msg.10%\002 ; Total teste: \002%msg.11%\002 ; Teste/1M pop: \002%msg.12%\002 ; Ultimul update: \002%msg.13%\002"
+set corona(ro.lang.3) "Statistici \002COVID-19\002 -- \002%msg.1%\002 -- Cazuri totale: \002%msg.2%\002 ; Cazuri noi: \037%msg.3%\037 ; Total decedati: \002%msg.4%\002 ; Noi decedati: \037%msg.5%\037 ; Recuperati: \002%msg.6%\002 ; Cazuri active: \037%msg.7%\037 ; Cazuri critice: \002%msg.8%\002 ; Total cazuri/1M pop: \002%msg.9%\002 ; Decedati/1M pop: \002%msg.10%\002 ; Total teste: \002%msg.11%\002 ; Teste/1M pop: \002%msg.12%\002 ; Populatie: \002%msg.14%\002 ; Ultimul update: \002%msg.13%\002"
 set corona(ro.lang.4) "(AUTO) Statistici \002COVID-19\002 pentru -- %msg.1% -- Cazuri totale: \002%msg.2%\002 ; Cazuri noi: \037%msg.3%\037 ; Total decedati: \002%msg.4%\002 ; Noi decedati: \037%msg.5%\037 ; Recuperati: \002%msg.6%\002 ; Cazuri active: \037%msg.7%\037 ; Cazuri critice: \002%msg.8%\002 ; Total cazuri/1M pop: \002%msg.9%\002 ; Decedati/1M pop: \002%msg.10%\002 ; Total teste: \002%msg.11%\002 ; Teste/1M pop: \002%msg.12%\002 ; Ultimul update: \002%msg.13%\002"
 set corona(ro.lang.5) "Statistici \002COVID-19\002 -- \002%msg.1%\002 -- Cazuri totale: \002%msg.2%\002 ; Cazuri noi: \037%msg.3%\037 ; Total decedati: \002%msg.4%\002 ; Noi decedati: \037%msg.5%\037 ; Recuperati: \002%msg.6%\002 ; Cazuri active: \037%msg.7%\037 ; Cazuri critice: \002%msg.8%\002 ; Total cazuri/1M pop: \002%msg.9%\002 ; Decedati/1M pop: \002%msg.10%\002 ; Ultimul update: \002%msg.11%\002"
 set corona(ro.lang.6) "(AUTO) Statistici \002COVID-19\002 pentru -- %msg.1% -- Cazuri totale: \002%msg.2%\002 ; Cazuri noi: \037%msg.3%\037 ; Total decedati: \002%msg.4%\002 ; Noi decedati: \037%msg.5%\037 ; Recuperati: \002%msg.6%\002 ; Cazuri active: \037%msg.7%\037 ; Cazuri critice: \002%msg.8%\002 ; Total cazuri/1M pop: \002%msg.9%\002 ; Decedati/1M pop: \002%msg.10%\002 ; Ultimul update: \002%msg.11%\002"
@@ -951,7 +1044,7 @@ set corona(ro.lang.6) "(AUTO) Statistici \002COVID-19\002 pentru -- %msg.1% -- C
 #Ayuda @ Undernet.org
 set corona(es.lang.1) "Nombre de pais invalido, o no presenta casos."
 set corona(es.lang.2) "Has excedido el numero de intentos. Por favor espera \002%msg.1%\002 segundos."
-set corona(es.lang.3) "\002COVID-19\002 Estadisticas -- \002%msg.1%\002 -- Total de Casos: \002%msg.2%\002 ; Nuevos Casos: \037%msg.3%\037 ; Total de personas fallecidas: \002%msg.4%\002 ; Nuevos casos de personas fallecidas: \037%msg.5%\037 ; Recuperados: \002%msg.6%\002 ; Casos activos: \037%msg.7%\037 ; En estado critico: \002%msg.8%\002 ; Total de Casos/1M pob: \002%msg.9%\002 ; Fallecimientos/1M pob: \002%msg.10%\002 ; Total de pruebas: \002%msg.11%\002 ; Pruebas/1M pob: \002%msg.12%\002 ; Ultima actualizacion: \002%msg.13%\002"
+set corona(es.lang.3) "\002COVID-19\002 Estadisticas -- \002%msg.1%\002 -- Total de Casos: \002%msg.2%\002 ; Nuevos Casos: \037%msg.3%\037 ; Total de personas fallecidas: \002%msg.4%\002 ; Nuevos casos de personas fallecidas: \037%msg.5%\037 ; Recuperados: \002%msg.6%\002 ; Casos activos: \037%msg.7%\037 ; En estado critico: \002%msg.8%\002 ; Total de Casos/1M pob: \002%msg.9%\002 ; Fallecimientos/1M pob: \002%msg.10%\002 ; Total de pruebas: \002%msg.11%\002 ; Pruebas/1M pob: \002%msg.12%\002 ; Poblaci�n: \002%msg.14%\002 ; Ultima actualizacion: \002%msg.13%\002"
 set corona(es.lang.4) "(AUTO) \002COVID-19\002 Estadisticas -- \002%msg.1%\002 -- Total de Casos: \002%msg.2%\002 ; Nuevos Casos: \037%msg.3%\037 ; Total de personas fallecidas: \002%msg.4%\002 ; Nuevoss casos de personas fallecidas: \037%msg.5%\037 ; Recuperados: \002%msg.6%\002 ; Casos activos: \037%msg.7%\037 ; En estado critico: \002%msg.8%\002 ; Total de Casos/1M pob: \002%msg.9%\002 ; Fallecimientos/1M pob: \002%msg.10%\002 ; Total de pruebas: \002%msg.11%\002 ; Pruebas/1M pob: \002%msg.12%\002 ; Ultima actualizacion: \002%msg.13%\002"
 set corona(es.lang.5) "\002COVID-19\002 Estadisticas -- \002%msg.1%\002 -- Total de Casos: \002%msg.2%\002 ; Nuevos Casos: \037%msg.3%\037 ; Total de personas fallecidas: \002%msg.4%\002 ; Nuevos casos de personas fallecidas: \037%msg.5%\037 ; Recuperados: \002%msg.6%\002 ; Casos activos: \037%msg.7%\037 ; En estado critico: \002%msg.8%\002 ; Total de Casos/1M pob: \002%msg.9%\002 ; Fallecimientos/1M pob: \002%msg.10%\002 ; Ultima actualizacion: \002%msg.11%\002"
 set corona(es.lang.6) "(AUTO) \002COVID-19\002 Estadisticas -- \002%msg.1%\002 -- Total de Casos: \002%msg.2%\002 ; Nuevos Casos: \037%msg.3%\037 ; Total de personas fallecidas: \002%msg.4%\002 ; Nuevos casos de personas fallecidas: \037%msg.5%\037 ; Recuperados: \002%msg.6%\002 ; Casos activos: \037%msg.7%\037 ; En estado critico: \002%msg.8%\002 ; Total de Casos/1M pob: \002%msg.9%\002 ; Fallecimientos/1M pob: \002%msg.10%\002 ; Ultima actualizacion: \002%msg.11%\002"
